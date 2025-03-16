@@ -122,6 +122,7 @@ def process_csv_file(file_path, output_folder):
     # Fill NaN for the first row (if any) with dt, so that each row has a valid dt.
     # merged_df["dt"] = merged_df["time"].diff().fillna(dt)
     
+    #assume that dt = 0.01
     dt = 0.01
     # Compute energy for each row
     merged_df["energy"] = (merged_df["voltage"] * merged_df["current"]).abs() * dt
