@@ -1,0 +1,3 @@
+/home/gary/Capstone/Neural/NN/NN_C_Test/build/CMakeFiles/rebuild_cache.dir
+/home/gary/Capstone/Neural/NN/NN_C_Test/build/CMakeFiles/edit_cache.dir
+/home/gary/Capstone/Neural/NN/NN_C_Test/build/CMakeFiles/NN_C_Test.dir

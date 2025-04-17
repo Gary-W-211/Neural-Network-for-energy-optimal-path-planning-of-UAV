@@ -1,0 +1,1 @@
+/usr/bin/c++     CMakeFiles/NN_C_Test.dir/main.cpp.o  -o NN_C_Test   -L/home/gary/Capstone/MNN/build  -Wl,-rpath,/home/gary/Capstone/MNN/build -lMNN -L/lib/x86_64-linux-gnu -lmvec -lm 

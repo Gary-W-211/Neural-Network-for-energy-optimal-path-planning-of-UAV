@@ -123,9 +123,9 @@ def process_csv_file(file_path, output_folder):
     # merged_df["dt"] = merged_df["time"].diff().fillna(dt)
     
     #assume that dt = 0.01
-    dt = 0.01
+    # dt = 0.01
     # Compute energy for each row
-    merged_df["energy"] = (merged_df["voltage"] * merged_df["current"]).abs() * dt
+    merged_df["energy"] = (merged_df["voltage"] * merged_df["current"]).abs()
 
     # Drop the 'group' column since it's no longer needed.
     if "group" in merged_df.columns:

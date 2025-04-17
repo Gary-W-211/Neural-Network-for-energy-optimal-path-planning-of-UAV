@@ -84,15 +84,15 @@ with torch.no_grad():
 all_targets_norm = np.array(all_targets_norm).reshape(-1, 1)
 all_predictions_norm = np.array(all_predictions_norm).reshape(-1, 1)
 
+# Compute evaluation metrics
+mae = mean_absolute_error(all_targets_norm, all_predictions_norm)
+mse = mean_squared_error(all_targets_norm, all_predictions_norm)
+rmse = np.sqrt(mean_squared_error(all_targets_norm, all_predictions_norm))
+r2 = r2_score(all_targets_norm, all_predictions_norm)
+
 # Inverse transform to original scale using the saved target scaler.
 actual_energy = target_scaler.inverse_transform(all_targets_norm).flatten()
 predicted_energy = target_scaler.inverse_transform(all_predictions_norm).flatten()
-
-# Compute evaluation metrics
-mae = mean_absolute_error(actual_energy, predicted_energy)
-mse = mean_squared_error(actual_energy, predicted_energy)
-rmse = np.sqrt(mean_squared_error(actual_energy, predicted_energy))
-r2 = r2_score(actual_energy, predicted_energy)
 
 print(f"Mean Absolute Error (MAE) on original scale: {mae:.4f}")
 print(f"Mean Squared Error (MSE) on original scale: {mse:.4f}")
@@ -100,8 +100,10 @@ print(f"Root Mean Squared Error (RMSE) on original scale: {rmse:.4f}")
 print(f"R² Score on original scale: {r2:.4f}")
 
 # Compute and print total energy consumption on the test set (original scale)
-total_actual_energy = np.sum(actual_energy)
-total_predicted_energy = np.sum(predicted_energy)
+#assume that dt is 0.01
+dt = 0.01
+total_actual_energy = np.sum(actual_energy*dt)
+total_predicted_energy = np.sum(predicted_energy*dt)
 print(f"Total Actual Energy Consumption (Test Set): {total_actual_energy:.4f}")
 print(f"Total Predicted Energy Consumption (Test Set): {total_predicted_energy:.4f}")
 

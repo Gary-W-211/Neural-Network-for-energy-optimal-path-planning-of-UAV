@@ -7,6 +7,7 @@ from torch.utils.data import Dataset, DataLoader
 import torch.nn as nn
 import matplotlib.pyplot as plt
 import seaborn as sns
+import json
 import joblib  # used for saving and loading scalers
 from sklearn.metrics import mean_squared_error, r2_score
 # from sklearn.model_selection import train_test_split
@@ -55,6 +56,25 @@ target_scaler.fit(target_train)
 # Save the scalers for future use.
 joblib.dump(features_scaler, "./My_NN/scalers/features_scaler.pkl")
 joblib.dump(target_scaler, "./My_NN/scalers/target_scaler.pkl")
+
+# Save the scalers for C++
+features_scaler_params = {
+    "mean": features_scaler.mean_.tolist(),
+    "scale": features_scaler.scale_.tolist()
+}
+
+with open("./My_NN/scalers/features_scaler.json", "w") as f:
+    json.dump(features_scaler_params, f)
+
+
+target_scaler_params = {
+    "mean": target_scaler.mean_.tolist(),
+    "scale": target_scaler.scale_.tolist()
+}
+
+with open("./My_NN/scalers/target_scaler.json", "w") as f:
+    json.dump(target_scaler_params, f)
+
 
 # Transform training and test data.
 features_train_norm = features_scaler.transform(features_train)
@@ -106,8 +126,14 @@ print(f"Training samples: {len(train_dataset)}, Testing samples: {len(test_datas
 class GRURegressor(nn.Module):
     def __init__(self, input_dim, hidden_dim, num_layers, output_dim):
         super(GRURegressor, self).__init__()
-        self.gru = nn.GRU(input_dim, hidden_dim, num_layers, batch_first=True)
+        self.gru = nn.GRU(input_dim, hidden_dim, num_layers, batch_first=True,)
+        
         self.fc = nn.Linear(hidden_dim, output_dim)
+        
+        # self.fc = nn.Sequential(
+        #     nn.Dropout(dropout),
+        #     nn.Linear(hidden_dim, output_dim)
+        # )
 
     def forward(self, x):
         # x shape: (batch, seq_length, input_dim)
@@ -134,7 +160,7 @@ criterion = nn.MSELoss()
 optimizer = torch.optim.Adam(gru_model.parameters(), lr=0.001)
 
 # Training Loop
-num_epochs = 100
+num_epochs = 80
 gru_losses = []
 
 for epoch in range(num_epochs):
@@ -156,10 +182,26 @@ for epoch in range(num_epochs):
 print("Training completed!")
 gru_model.eval()
 
-# Save the Trained Model
+# Save the Trained Model(.pth)
 model_path = "./My_NN/models/gru_model.pth"
 torch.save(gru_model.state_dict(), model_path)
 print(f"Model saved to {model_path}")
+
+#Save the model(.onnx)
+dummy_input = torch.randn(1, seq_length, input_dim).to(device)
+onnx_model_path = "./My_NN/models/gru_model.onnx"
+
+torch.onnx.export(gru_model,               # name of model
+                  dummy_input,             
+                  onnx_model_path,         
+                  export_params=True,      # with parameters
+                  opset_version=11,        # ONNX version
+                  do_constant_folding=True,
+                  input_names=['input'],   
+                  output_names=['output'],
+                  dynamic_axes={'input': {0: 'batch_size'},  # support dynamic batch_size
+                                'output': {0: 'batch_size'}})
+print(f"ONNX model saved to {onnx_model_path}")
 
 # Evaluation on Test Set (with Inverse Normalization)
 test_loss = 0.0
@@ -182,29 +224,31 @@ print(f"Normalized GRU Test Loss (MSE): {test_loss:.4f}")
 all_targets_norm = np.array(all_targets_norm).reshape(-1, 1)
 all_predictions_norm = np.array(all_predictions_norm).reshape(-1, 1)
 
+# Compute evaluation metrics.
+#MAE
+mae = np.mean(np.abs(all_targets_norm - all_predictions_norm))
+print(f"Mean Absolute Error (MAE) of Energy: {mae:.4f}")
+
+#MSE
+mse = mean_squared_error(all_targets_norm, all_predictions_norm)
+print(f"Mean Squared Error (MSE) on original scale: {mse:.4f}")
+
+# RMSE = sqrt(MSE) 
+rmse = np.sqrt(mean_squared_error(all_targets_norm, all_predictions_norm))
+print(f"Root Mean Squared Error (RMSE) on original scale: {rmse:.4f}")
+
+#R^2 test
+r2 = r2_score(all_targets_norm, all_predictions_norm)
+print(f"R² Score on original scale: {r2:.4f}")
+
 # Inverse transform to original scale.
 actual_energy = target_scaler.inverse_transform(all_targets_norm).flatten()
 predicted_energy = target_scaler.inverse_transform(all_predictions_norm).flatten()
 
-# Compute evaluation metrics.
-#MAE
-mae = np.mean(np.abs(actual_energy - predicted_energy))
-print(f"Mean Absolute Error (MAE) of Energy: {mae:.4f}")
-
-#MSE
-mse = mean_squared_error(actual_energy, predicted_energy)
-print(f"Mean Squared Error (MSE) on original scale: {mse:.4f}")
-
-# RMSE = sqrt(MSE) 
-rmse = np.sqrt(mean_squared_error(actual_energy, predicted_energy))
-print(f"Root Mean Squared Error (RMSE) on original scale: {rmse:.4f}")
-
-#R^2 test
-r2 = r2_score(actual_energy, predicted_energy)
-print(f"R² Score on original scale: {r2:.4f}")
-
-total_actual_energy = np.sum(actual_energy)
-total_predicted_energy = np.sum(predicted_energy)
+#assume dt = 0.01
+dt = 0.01
+total_actual_energy = np.sum(actual_energy*dt)
+total_predicted_energy = np.sum(predicted_energy*dt)
 print(f"Total Actual Energy Consumption (Test Set): {total_actual_energy:.4f}")
 print(f"Total Predicted Energy Consumption (Test Set): {total_predicted_energy:.4f}")
 
