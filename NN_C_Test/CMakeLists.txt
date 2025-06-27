@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(MNN_Test)
+project(NN_C_Test)
 
 # 设置 C++ 标准 (例如 C++11)
 set(CMAKE_CXX_STANDARD 11)

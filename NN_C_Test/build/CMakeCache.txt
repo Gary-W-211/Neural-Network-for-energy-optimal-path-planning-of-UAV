@@ -145,7 +145,7 @@ CMAKE_PROJECT_DESCRIPTION:STATIC=
 CMAKE_PROJECT_HOMEPAGE_URL:STATIC=
 
 //Value Computed by CMake
-CMAKE_PROJECT_NAME:STATIC=MNN_Test
+CMAKE_PROJECT_NAME:STATIC=NN_C_Test
 
 //Path to a program.
 CMAKE_RANLIB:FILEPATH=/usr/bin/ranlib
@@ -210,10 +210,10 @@ CMAKE_STRIP:FILEPATH=/usr/bin/strip
 CMAKE_VERBOSE_MAKEFILE:BOOL=FALSE
 
 //Value Computed by CMake
-MNN_Test_BINARY_DIR:STATIC=/home/gary/Capstone/Neural/NN/NN_C_Test/build
+NN_C_Test_BINARY_DIR:STATIC=/home/gary/Capstone/Neural/NN/NN_C_Test/build
 
 //Value Computed by CMake
-MNN_Test_SOURCE_DIR:STATIC=/home/gary/Capstone/Neural/NN/NN_C_Test
+NN_C_Test_SOURCE_DIR:STATIC=/home/gary/Capstone/Neural/NN/NN_C_Test
 
 
 ########################

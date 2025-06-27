@@ -63,7 +63,7 @@ features_scaler_params = {
     "scale": features_scaler.scale_.tolist()
 }
 
-with open("./My_NN/scalers/features_scaler.json", "w") as f:
+with open("./My_NN/scalers/gru_features_scaler.json", "w") as f:
     json.dump(features_scaler_params, f)
 
 
@@ -72,7 +72,7 @@ target_scaler_params = {
     "scale": target_scaler.scale_.tolist()
 }
 
-with open("./My_NN/scalers/target_scaler.json", "w") as f:
+with open("./My_NN/scalers/gru_target_scaler.json", "w") as f:
     json.dump(target_scaler_params, f)
 
 
